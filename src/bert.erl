@@ -31,12 +31,12 @@ encode_term(Term) ->
     true -> {bert, true};
     false -> {bert, false};
     Dict when is_record(Term, dict, 9) ->
-      {bert, dict, lists:keymap(fun encode_term/1, 2, dict:to_list(Dict))};
+      {bert, dict, [encode_term(V) || V <- dict:to_list(Dict)]};
     List when is_list(Term) ->
-      lists:map((fun encode_term/1), List);
+      [encode_term(V) || V <- List];
     Tuple when is_tuple(Term) ->
       TList = tuple_to_list(Tuple),
-      TList2 = lists:map((fun encode_term/1), TList),
+      TList2 = [encode_term(V) || V <- TList],
       list_to_tuple(TList2);
     _Else -> Term
   end.
@@ -52,14 +52,14 @@ decode_term(Term) ->
     {bert, true} -> true;
     {bert, false} -> false;
     {bert, dict, Dict} ->
-      dict:from_list(lists:keymap(fun decode_term/1, 2, Dict));
+      dict:from_list([decode_term(V) || V <- Dict]);
     {bert, Other} ->
       {bert, Other};
     List when is_list(Term) ->
-      lists:map((fun decode_term/1), List);
+      [decode_term(V) || V <- List];
     Tuple when is_tuple(Term) ->
       TList = tuple_to_list(Tuple),
-      TList2 = lists:map((fun decode_term/1), TList),
+      TList2 = [decode_term(V) || V <- TList],
       list_to_tuple(TList2);
     _Else -> Term
   end.
